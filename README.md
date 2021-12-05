@@ -1,3 +1,3 @@
 "# AdventOfCode2021" 
 
-Learnign pyton, so the solutions are not elegant :)
+learning python, so the solutions are not elegant : )
