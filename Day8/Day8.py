@@ -1,3 +1,91 @@
+from itertools import permutations
+
+def HasAllLetters(InA, InB):
+# Does all the letters exist in the combination?
+    found = True
+    for letterIndex in range(len(InA)):
+        letterFound = False
+        for cominationLetterIndex in range(len(InB)):
+            if InA[letterIndex] == InB[cominationLetterIndex]:
+                letterFound = True
+        found = found & letterFound   
+    return found
+
+def CharToInt(InChar):
+    return ord(InChar) - ord('a')
+
+def ExistsIn(InValue, InArray):
+    for index, value in enumerate(InArray):
+        if value == InValue:
+            return index
+
+    return -1
+
+cleanCombinations = ["abcefg","cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg"]
+
+outNumbers = []
+currentInput = []
+def CouldBeNumber(InScanIndex, InScrambledToClean, depth):
+    global outNumbers
+    global currentInput
+    if InScanIndex == 9:
+        return True
+    
+    cleanString = cleanCombinations[InScanIndex]
+    for inputIndex, inputString in enumerate(currentInput):
+
+        # Not same length
+        if len(cleanString) != len(inputString):
+            continue
+
+        # Iterate the word, Make sure all match
+
+        allPermutations = permutations(inputString)
+
+        for permIndex, permutatedValue in enumerate(allPermutations):
+            # print(cleanString + " : " + "".join(permutatedValue) + " @ " + str(depth))
+            
+            validWord = True
+            scrambledToClean = InScrambledToClean.copy()
+            for letterIndex, cleanLetter in enumerate(cleanString):
+
+                scambledLetterValue = permutatedValue[letterIndex]
+                scambleLetterIndex = CharToInt(scambledLetterValue)
+
+                cleanLetterValue = cleanLetter
+                cleanLetterIndex = CharToInt(cleanLetterValue)
+
+                if scrambledToClean[scambleLetterIndex] == -1:
+                    # Assume that the wire can go to the clean output
+                    scrambledToClean[scambleLetterIndex] = cleanLetterValue
+                    # print("Wire: " + str(scambleLetterIndex) + " = " + str(cleanLetterValue))
+                else:
+                    if scrambledToClean[scambleLetterIndex] != cleanLetterValue:
+                        validWord = False
+                        # print("Wire: " + str(scambleLetterIndex) + " != " + str(cleanLetterValue))
+
+                        break
+                    else:
+                        continue
+                    
+            if not validWord:
+                continue
+            
+            
+            # If all numbers are fine with this, return the connections
+            if not CouldBeNumber(InScanIndex + 1, scrambledToClean, depth + 1):
+                continue
+            else:
+                if len(outNumbers) == 0:
+                    print("Found")
+                    outNumbers = scrambledToClean
+                return True
+
+    return False
+
+
+
+
 inputFile = open("input.txt", "r")
 inputLines = inputFile.readlines()
 outputCombinations = []
@@ -12,8 +100,8 @@ for index, line in enumerate(inputLines):
             continue
         if len(value) == 0:
             continue
-        # inputCombinations[len(inputCombinations) - 1].append(value.removesuffix("\n"))
-        inputCombinations[len(inputCombinations) - 1].append("".join(sorted(value.removesuffix("\n"))))
+        inputCombinations[len(inputCombinations) - 1].append(value.removesuffix("\n"))
+        # inputCombinations[len(inputCombinations) - 1].append("".join(sorted(value.removesuffix("\n"))))
 
     outputCombinations.append([])
     # Output numbers
@@ -22,76 +110,47 @@ for index, line in enumerate(inputLines):
             continue
         if len(value) == 0:
             continue
-        # outputCombinations[len(outputCombinations) - 1].append(value.removesuffix("\n"))
-        outputCombinations[len(outputCombinations) - 1].append("".join(sorted(value.removesuffix("\n"))))
-
-cleanCombinations = ["abcefg","cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg"]
-uniqueCombinations = ["","cf","","","bcdf","","","acf","abcdefg",""]
+        outputCombinations[len(outputCombinations) - 1].append(value.removesuffix("\n"))
+        # outputCombinations[len(outputCombinations) - 1].append("".join(sorted(value.removesuffix("\n"))))
 
 count = 0
 for outListIndex, outList in enumerate(outputCombinations):
     currentCount = 0
+    
+    # print("")
+    # print("")
+    # print("")
+    # print("")
+    # print("")
 
-    #Find scambled connections. we know from part 1 that 1 4 5 7 can be matched.
-    # # char -> int -> real char 
-    foundConnections = ['0','0','0','0','0','0','0','0','0','0','0']
-    ## do an simple pass. for the ones that we know the connections of
-    for inputIndex, inputValue in enumerate(inputCombinations[outListIndex]):
-        for combinationIndex, combinationValue in enumerate(uniqueCombinations):
+    currentInput = inputCombinations[outListIndex]
+    remaningNumbers = [0,1,2,3,4,5,6,7,8,9]
+    outNumbers = []
+    CouldBeNumber(0, [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], 0)
+            
+
+
+
+    for i, val in enumerate(outList):
+        charArray = []
+        for letter, letterVal in enumerate(val):
+            charArray.append(outNumbers[CharToInt(letterVal)])
+
+        inputValue = "".join(sorted(charArray))
+        # print(inputValue)
+        for combinationIndex, combinationValue in enumerate(cleanCombinations):
+
             if len(combinationValue) != len(inputValue):
                 continue
 
-            print(inputValue + " @" + str(inputIndex) + " clean: " + combinationValue + " @" + str(combinationIndex))
+            found = HasAllLetters(combinationValue, inputValue)
 
-            for letterIndex, letter in enumerate(inputValue):
-                connectionIndex = ord(letter) - ord('a')
-                foundConnections[connectionIndex] = combinationValue[letterIndex]
-                print(letter + " equals " + combinationValue[letterIndex])
-
-            print(foundConnections)
-
-            
-            
-
-    # Now that we know most of the connections (abcdfg) missing (e)
-    remainingLinks = ['a','b','c','d','e','f','g']
-    for index, foundConnection in enumerate(foundConnections):
-        if foundConnection == -1:
-            continue
-        remainingLinks.remove(foundConnection)
-    
-    foundConnections['e'] = remainingLinks[0]
-
-
-
-
-    # we can connect most of the unknowns. 
-
-
-
-    for outIndex, outValue in enumerate(outList):
-        print("scanning: " + outValue)
-        for combinationIndex, combinationValue in enumerate(combinations):
-
-            if len(combinationValue) != len(outValue):
-                continue
-            print(outValue + " vs " + combinationValue + " Len match: " + str(combinationIndex))
-            # Does all the letters exist in the combination?
-            found = True
-            for letterIndex in range(len(combinationValue)):
-                letterFound = False
-                for cominationLetterIndex in range(len(outValue)):
-                    if combinationValue[letterIndex] == outValue[cominationLetterIndex]:
-                        letterFound = True
-                if not letterFound:
-                    print("Missing letter: " + str(combinationValue[letterIndex]))
-                found = found & letterFound            
             if not found:
                 continue
-            # 0 -> 1, 1->10, 2->100 
-            val = combinationIndex * pow(10, 3 - outIndex % 4)
-            print("Full match " + outValue + "  :  " + combinationValue + " -> " + str(val))
 
+            # print("Match")
+            # 0 -> 1, 1->10, 2->100 
+            val = combinationIndex * pow(10, 3 - i % 4)
             currentCount += val
             break
 
