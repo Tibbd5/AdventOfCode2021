@@ -28,7 +28,7 @@ def GetEquivlant(InCloser):
 chunkStack = []
 def IsCurrupt(InLine):
 
-
+    valid = True
     for index, char in enumerate(InLine):
         if ExistsIn(char, chunkOpeners):
             chunkStack.append(char)
@@ -37,27 +37,27 @@ def IsCurrupt(InLine):
         if ExistsIn(char, chunkClosers):
             if chunkStack[len(chunkStack) - 1] != GetEquivlant(char):
                 print("Currupt " + char + " @ " + str(index))
-                return False
+                valid = False
+                # return False
             else:
                 chunkStack.pop()
     # Part 1, ignore all non currupted
 
-    return True
+    return valid
 
 scores = []
 for index, line in enumerate(inputLines):
     print("index: " + str(index))
     chunkStack = []
-    isCurrupt = IsCurrupt(line) 
-    if isCurrupt:
+    isValid = IsCurrupt(line) 
+    if not isValid:
         continue
 
     print(str(chunkStack))
 
     count = 0
-    for closerIndex, closerValue in enumerate(chunkStack):
+    for closerIndex, closerValue in enumerate(reversed(chunkStack)):
         count *= 5
-        print(str(count))
         if closerValue == '{':
             count += 3
 
@@ -69,9 +69,9 @@ for index, line in enumerate(inputLines):
 
         if closerValue == '(':
             count += 1
-        print(" a "+str(count))
+        # print(str(count))
 
     scores.append(count)
 
 scores.sort()
-print(str(scores))
+print(str(scores[int(len(scores) / 2)]))
