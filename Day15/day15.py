@@ -75,10 +75,10 @@ def PrintNodePath(InNode):
                     direction = "-"
 
             string = direction #+ " " + str(node.RiskValue) # + " " + str(node.ParentRisk + node.RiskValue)+ " " + str(node.Distance) + " " + str(int(GetTotalRiskOf(node.Index) + 1))
-            # if finalPathIndexes.__contains__(GetIndexOf(x,y)):
-            print('\033[38;5;' + str(233 + node.RiskValue) + "m" + str(string) + color.END, end="")
-            # else:
-            #     print('\033[38;5;' + str(233 + node.RiskValue) + "m" + str(node.RiskValue) + color.END, end="")
+            if finalPathIndexes.__contains__(GetIndexOf(x,y)):
+                print('\033[38;5;' + str(15 + node.RiskValue * 2) + "m" + str(string) + color.END, end="")
+            else:
+                print('\033[38;5;' + str(231 + node.RiskValue * 2) + "m" + str(string) + color.END, end="")
         print("")
     
 for y in range(worldSizeY):
@@ -139,8 +139,9 @@ while len(openNodeIndexes) > 0:
         continue
 
     currentNode = GetNodeOf(currentNodeIndex)
-    # PrintNodePath(currentNode)
-
+    PrintNodePath(currentNode)
+    print("")
+    print("")
     closedIndexes.append(GetIndexOf(currentNode.XPos, currentNode.YPos))
     # print("Lowest risk: " + str(currentNode.RiskValue) + " Total: " + str(GetTotalRiskOf(currentNode.Index)))
     x = currentNode.XPos
